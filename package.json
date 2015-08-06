@@ -1,0 +1,19 @@
+{
+  "name": "js-code-parser",
+  "version": "0.0.1",
+  "description": "parse js code",
+  "main": "x.js",
+  "dependencies": {
+    "esprima": "^2.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "code",
+    "parsing"
+  ],
+  "author": "sumeet",
+  "license": "MIT"
+}
