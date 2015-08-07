@@ -1,7 +1,7 @@
 var fs = require('fs');
 var esprima = require('esprima');
 
-var parser = function(content, fname) {
+var jsParser = function(content, fname) {
   try {
     var json = esprima.parse(content);
   } catch(err) {
@@ -15,7 +15,8 @@ var parser = function(content, fname) {
     if (json.body[0]
         && json.body[0].type === 'ExpressionStatement' 
         && json.body[0].expression.type == 'CallExpression'
-        && json.body[0].expression.callee.name == 'define') {
+        && (json.body[0].expression.callee.name == 'define'
+            || json.body[0].expression.callee.name == 'requirejs')) {
       var expr = json.body[0].expression;
       if (expr.arguments[0].type == 'FunctionExpression') {
         console.log("ERROR:" + fname + ":define is passing in require");
@@ -39,7 +40,7 @@ process.argv.forEach(function (val, index, array) {
     try {
       if (!fs.lstatSync(val).isDirectory()) {
         var content = fs.readFileSync(val);
-        parser(content, val);
+        jsParser(content, val);
       }
     } catch(err) {
       console.log("ERROR:" + val + ":" + err);
