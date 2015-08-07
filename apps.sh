@@ -7,8 +7,10 @@ if [ "$1" != "" ]; then
 fi
 
 # itsi
-[[ $run_all = true || $run_all = itsi ]] && run.sh ~/workspace/app-itsi/apps/itsi/appserver/static/js "*.js" ~/workspace/app-itsi/apps/itsi/appserver/static/js/pages/built
+[[ $run_all = true || $run_all = itsi ]] && run.sh ~/workspace/app-itsi/apps/itsi/appserver/static/js "*.js" ~/workspace/app-itsi/apps/itsi/appserver/static/js/pages/built > itsi.out
 
 #dbx
-[[ $run_all = true || $run_all = dbx ]] && run.sh ~/workspace/app-dbx/package/appserver/static/js "*.js" 
+[[ $run_all = true || $run_all = dbx ]] && run.sh ~/workspace/app-dbx/package/appserver/static/js "*.js" > dbx.out
 
+#process all out files
+cat *.out | sort | uniq
