@@ -1,7 +1,11 @@
 var fs = require('fs');
 var esprima = require('esprima');
 var sqlite3 = require('sqlite3').verbose();
+
+// global variables
 var db;
+var app = 'generic';
+var path_stem = '';
 
 var jsParser = function (content, fname) {
     try {
@@ -14,19 +18,20 @@ var jsParser = function (content, fname) {
     //
 
     try {
-        if (json.body[0]
-            && json.body[0].type === 'ExpressionStatement'
-            && json.body[0].expression.type == 'CallExpression'
-            && (json.body[0].expression.callee.name == 'define'
-            || json.body[0].expression.callee.name == 'requirejs')) {
-            var expr = json.body[0].expression;
+        var firstStatement = json.body[0];
+        if (firstStatement
+            && firstStatement.type === 'ExpressionStatement'
+            && firstStatement.expression.type == 'CallExpression'
+            && (firstStatement.expression.callee.name == 'define'
+            || firstStatement.expression.callee.name == 'requirejs')) {
+            var expr = firstStatement.expression;
             if (expr.arguments[0].type == 'FunctionExpression') {
                 console.log("ERROR:" + fname + ":define is passing in require");
                 return;
             }
-            var args = json.body[0].expression.arguments[0].elements;
+            var args = firstStatement.expression.arguments[0].elements;
             db.serialize(function() {
-                data = { $app: "itsi", $filename: fname };
+                data = { $app: app, $filename: fname.replace(path_stem, '') };
                 db.run("insert into code(app, filename) values($app, $filename)", data);
                 db.get("select codeid from code where app = $app and filename = $filename", data, function(err, row) {
                     if (err) {
@@ -54,7 +59,8 @@ var jsParser = function (content, fname) {
 
 var processArgs = function() {
     var argv = require('minimist')(process.argv.slice(2));
-
+    app = argv.a;
+    path_stem = argv.s;
     argv._.forEach(function (val, index, array) {
         if (index > 1) {
             //console.log("index: " + index + " val: " + val);
