@@ -1,5 +1,6 @@
 # js-code-parser #
-use it for finding define dependencies.
+
+A program to statistically calculate dependencies among amd js applications.
 
 ## sample usage ##
 
