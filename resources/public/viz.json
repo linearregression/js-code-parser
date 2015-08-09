@@ -3,13 +3,17 @@
   {"name":"dbx"},
   {"name":"views/shared/1"},
   {"name":"views/shared/2"},
+  {"name":"views/1"},
+  {"name":"views/2"},
   {"name":"core"}
 ],
 "links":[
   {"source":0,"target":2,"value":3},
-  {"source":0,"target":3,"value":4},
+  {"source":0,"target":3,"value":2},
   {"source":1,"target":2,"value":3},
-  {"source":1,"target":3,"value":3},
-  {"source":2,"target":4,"value":1},
-  {"source":3,"target":4,"value":1}
+  {"source":1,"target":3,"value":2},
+  {"source":6,"target":2,"value":4},
+  {"source":6,"target":3,"value":4},
+  {"source":6,"target":4,"value":4},
+  {"source":6,"target":5,"value":4}
 ]}
