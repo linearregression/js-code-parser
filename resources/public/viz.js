@@ -6,7 +6,7 @@ var margin = {top: 1, right: 1, bottom: 6, left: 1},
     height = 500 - margin.top - margin.bottom;
 
 var formatNumber = d3.format(",.0f"),
-    format = function(d) { return formatNumber(d) + " TWh"; },
+    format = function(d) { return formatNumber(d) + " calls"; },
     color = d3.scale.category20();
 
 var svg = d3.select("#chart").append("svg")

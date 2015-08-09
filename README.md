@@ -1,7 +1,13 @@
 # js-code-parser #
 
-A program to statistically calculate dependencies among amd js applications.
+A program to calculate & visualize dependencies among amd js applications.
 
-## sample usage ##
+## generate data ##
 
-    $ find <js-file-path> -path <ignore-directory> -prune -o -name '*.js' | xargs node x.js | sort | uniq
+checkout various applications
+
+    $ ./apps.sh
+    
+## visualize ##
+
+    $ node d.js
