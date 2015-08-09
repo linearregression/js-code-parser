@@ -7,10 +7,16 @@ if [ "$1" != "" ]; then
 fi
 
 run_x_js() {
-  if [[ $# -eq 3 ]]; then
-    find "$2" -path "$4" -prune -o -name "$3" | xargs node x.js -a $1 -s /Users/sumeet/workspace
+  local mode=$1
+  local app=$2
+  local path=$3
+  local pattern=$4
+  local exclude=${5:-notset}
+
+  if [ "$exclude" = "notset" ]; then
+    find "$path" -name "$pattern" | xargs node x.js -a "$app" -s /Users/sumeet/workspace -m "$mode"
   else
-    find "$2" -name "$3" | xargs node x.js -a $1 -s /Users/sumeet/workspace
+    find "$path" -path "$exclude" -prune -o -name "$pattern" | xargs node x.js -a "$app" -s /Users/sumeet/workspace -m "$mode"
   fi
 }
 
@@ -18,7 +24,12 @@ run_x_js() {
 rm db.sqlite
 
 # itsi
-[[ ${run_all} = true || ${run_all} = itsi ]] && run_x_js itsi ~/workspace/app-itsi/apps/itsi/appserver/static/js "*.js" ~/workspace/app-itsi/apps/itsi/appserver/static/js/pages/built
+if [[ ${run_all} = true || ${run_all} = itsi ]]; then
+  run_x_js define itsi ~/workspace/app-itsi/apps/itsi/appserver/static/js "*.js" ~/workspace/app-itsi/apps/itsi/appserver/static/js/pages/built
+  #run_x_js html itsi ~/workspace/app-itsi/apps/itsi/appserver/templates "*.html"
+fi
 
 #dbx
-[[ ${run_all} = true || ${run_all} = dbx ]] && run_x_js dbx ~/workspace/app-dbx/package/appserver/static/js "*.js"
+if [[ ${run_all} = true || ${run_all} = dbx ]]; then
+  run_x_js define dbx ~/workspace/app-dbx/package/appserver/static/js "*.js"
+fi
