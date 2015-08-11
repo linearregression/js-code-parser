@@ -41,7 +41,6 @@ app.get('/:type(json|js|css)/:file', function (req, res) {
     sendFile(res, '/resources/public/', req.params.file);
 });
 
-
 var server = app.listen(3000, function () {
     var host = server.address().address;
     var port = server.address().port;
