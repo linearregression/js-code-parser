@@ -2,18 +2,13 @@
 
 var fs = require('fs');
 var esprima = require('esprima');
-var sqlite3 = require('sqlite3').verbose();
+var sqlite3 = require('sqlite3');
 var htmlparser = require('htmlparser');
 var util = require("util"); // for debugging objects
+var readContents = require('./f.js');
 
 // global variables
 var db;              // handler to db object
-
-var storeConfig = function(module, path) {
-    db.serialize(function() {
-
-    });
-};
 
 // called through htmlParser
 var configParser = function (content, fname, app) {
@@ -168,7 +163,7 @@ var defineParser = function (content, fname, app) {
                     }
 
                     //console.log("INFO:codeid: " + row.codeid);
-                    args.forEach(function (val, index, array) {
+                    args.forEach(function (val) {
                         db.run("insert into uses(codeid, module) values($codeid, $module)",
                             {
                                 $codeid: row.codeid,
@@ -186,19 +181,10 @@ var defineParser = function (content, fname, app) {
     }
 };
 
-// synchronous dfs
-function readContents(dir, ext, callback) {
-    var list = fs.readdirSync(dir);
+var associateDBContents = function (app, shared, extension) {
+    console.log("i am here, app: " + app.name);
 
-    list.forEach(function (entry) {
-        var fullpath = dir + "/" + entry;
-        if (fs.lstatSync(fullpath).isDirectory()) {
-            readContents(fullpath, ext, callback);
-        } else if (fullpath.indexOf(ext, fullpath.length - ext.length) !== -1) {
-            callback(null, fullpath, fs.readFileSync(fullpath));
-        }
-    });
-}
+};
 
 var processArgs = function () {
     var argv = require('minimist')(process.argv.slice(2));
@@ -206,18 +192,26 @@ var processArgs = function () {
 
     appConfig.applications.forEach(function (app) {
 
-         readContents(app.js, ".js", function(err, filename, contents) {
+        readContents(app.js, ".js", function (err, filename, contents) {
             defineParser(contents, filename, app);
-         });
+        });
 
         readContents(app.html, ".html", function (err, filename, contents) {
             htmlParser(contents, filename, app);
         });
+
+        associateDBContents(app, app.shared, ".js");
     });
 };
 
 var ddl = function () {
     db.serialize(function () {
+
+        /*
+        db.on('trace', function(stmt) {
+            console.log("DEBUG:DB STMT:" + stmt);
+        });
+        */
 
         db.run("create table if not exists code(codeid integer primary key autoincrement, " +
             "app varchar(10), filename varchar(20))");
