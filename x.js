@@ -25,6 +25,7 @@ var configParser = function (content, fname, app) {
 
     //console.log(JSON.stringify(json, null, 2));
 
+
     json.body.forEach((function () {
         function findReqConfigs(elt, index, array) {
             //console.log("elt: " + elt.expression);
@@ -101,10 +102,13 @@ var htmlParser = function (rawHtml, fname, app) {
                         configParser(js, fname, app);
                     } else if (js.indexOf("shared.js") > 0) {
                         var r = js.split("'")[1];
-                        var s = r.split('/').splice(2, r.split('/').length).join('/');
-                        console.log("i am here ... :" + app.search_mrsparkle + ":" + s);
-                        readContents(app.search_mrsparkle, s, function (err, filename, jsContent) {
-                            console.log("filename:" + filename);
+                        var s = r;
+                        if (s.indexOf('/static/') === 0)
+                            s = r.split('/').splice(2, r.split('/').length).join('/');
+
+                        //console.log("i am here ... js :" + js + "parsed: " + ":" + s + ":");
+                        readContents(app.shared, s, function (err, filename, jsContent) {
+                            console.log("DEBUG: processing filename:" + filename);
                             configParser(jsContent, filename, app);
                         });
                     } else {
@@ -191,7 +195,7 @@ function readContents(dir, ext, callback) {
         if (fs.lstatSync(fullpath).isDirectory()) {
             readContents(fullpath, ext, callback);
         } else if (fullpath.indexOf(ext, fullpath.length - ext.length) !== -1) {
-            callback(null, entry, fs.readFileSync(fullpath));
+            callback(null, fullpath, fs.readFileSync(fullpath));
         }
     });
 }
