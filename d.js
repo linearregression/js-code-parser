@@ -8,7 +8,6 @@ var express = require('express');
 var app = express();
 var sqlite3 = require('sqlite3').verbose();
 var util = require('util');
-var readContents = require('./f.js');
 var fs = require('fs');
 var appConfig = JSON.parse(fs.readFileSync('app-conf.json', 'utf8'));
 
@@ -54,31 +53,6 @@ app.post('/json/:file', function(req, res) {
     console.log("generating file: " + req.params.file);
     
     db.serialize(function() {
-        appConfig.applications.forEach(function(app) {
-            console.log("came in with app: " + app.name);
-            db.each("select distinct u.module from uses u, code c where c.app = $app and u.codeid = c.codeid order by u.module",
-                {$app: app.name}, function (err, mrow) {
-
-                    console.log("app: " + app.name + " module: " + util.inspect(mrow, {showHidden: true, depth: null}));
-
-                    if (err) {
-                        console.log("ERROR:" + app.name + ":" + err + ":fetching distinct modules");
-                        return;
-                    }
-
-                    readContents(app.shared, mrow.module + '.js', function (err, filename) {
-                        db.run("insert into conf(app, conffile, shortcut, filename) values($app, $conffile, $shortcut, $filename)",
-                            {
-                                $app: app.name,
-                                $conffile: 'null',
-                                $shortcut: mrow.module,
-                                $filename: filename
-                            });
-                    });
-
-                }
-            );
-        });
 
     });
 

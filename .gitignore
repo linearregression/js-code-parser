@@ -4,3 +4,6 @@ node_modules
 *.out
 *.sqlite
 app-conf.json
+*.log
+venv
+resources/public/viz.json

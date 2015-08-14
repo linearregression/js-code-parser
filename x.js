@@ -102,7 +102,7 @@ var htmlParser = function (rawHtml, fname, app) {
                             s = r.split('/').splice(2, r.split('/').length).join('/');
 
                         //console.log("i am here ... js :" + js + "parsed: " + ":" + s + ":");
-                        readContents(app.shared, s, function (err, filename, jsContent) {
+                        readContents(app.shared, s, app.skip, function (err, filename, jsContent) {
                             console.log("DEBUG: processing filename:" + filename);
                             configParser(jsContent, filename, app);
                         });
@@ -192,11 +192,11 @@ var processArgs = function () {
 
     appConfig.applications.forEach(function (app) {
 
-        readContents(app.js, ".js", function (err, filename, contents) {
+        readContents(app.js, ".js", app.skip, function (err, filename, contents) {
             defineParser(contents, filename, app);
         });
 
-        readContents(app.html, ".html", function (err, filename, contents) {
+        readContents(app.html, ".html", app.skip, function (err, filename, contents) {
             htmlParser(contents, filename, app);
         });
 
