@@ -4,7 +4,6 @@ import sqlite3 as lite
 import logging
 import json
 import os
-from sets import Set
 
 def version(name):
     con = lite.connect(name)
@@ -19,12 +18,6 @@ def version(name):
         print "SQLite version: %s" % data
 
 
-def app_config(config):
-
-    with open(config) as data_file:
-        return json.load(data_file)
-
-
 def my_walker(root_dir, suffix, skip_dirs, callback):
 
     for dirName, subdirList, fileList in os.walk(root_dir):
@@ -34,14 +27,24 @@ def my_walker(root_dir, suffix, skip_dirs, callback):
             print('\t%s' % fname)
 
 
-def read_data(db, app, graph):
-    """
-    reading data from db
-    :type db: name of db
-    """
-    con = lite.connect(db)
+class UsingHeuristic:
 
-    with con:
+    graph = {}
+
+    def __init__(self, apps, db_name):
+        self.apps = apps
+        self.db_name = db_name
+
+        con = lite.connect(self.db_name)
+
+        with con:
+            for app in self.apps:
+                self.populate(con, app)
+
+    def populate(self, con, app):
+        """
+        reading data from db
+        """
 
         cur = con.cursor()
         cur.execute("SELECT DISTINCT shortcut FROM conf f WHERE f.app = '{app_name}' AND conffile = 'null'"
@@ -49,73 +52,65 @@ def read_data(db, app, graph):
 
         rows = cur.fetchall()
 
-        #for row in rows:
-        #    print row
+            #for row in rows:
+            #    print row
 
-        logging.debug(rows[0]);
+            # logging.debug(rows[0])
 
+        # get all shortcuts
         a = [node[0] for node in rows]
 
-        graph[app['name']] = a
+        self.graph[app['name']] = a
 
-        if 'core' in graph:
-            s = set(graph['core']) | set(a)
-            graph['core'] = [node for node in s]
+        if 'core' in self.graph:
+            s = set(self.graph['core']) | set(a)
+            self.graph['core'] = [node for node in s]
         else:
-            graph['core'] = a
+            self.graph['core'] = a
 
         for node in rows:
-            graph[node[0]] = []
+            self.graph[node[0]] = []
 
-        return graph
+    @staticmethod
+    def list_by_position(node_list, graph):
+        return [graph[node]['position'] for node in node_list]
 
+    def create_sankey(self, filename):
+        json_dict = {}
 
-def list_by_position(node_list, graph):
-    return [graph[node]['position'] for node in node_list]
+        # pin the nodes in an array
+        nodes = self.graph.keys()
 
+        json_dict = {'nodes': [{'name': node} for node in nodes],
+                     'links': []}
 
-def write_graph(name, graph):
+        # mark position for each node
+        for i in range(0, len(nodes)):
+            self.graph[nodes[i]] = {'list': self.graph[nodes[i]], 'position': i}
 
-    json_dict = {}
+        # start creating edges by position
+        for i in range(0, len(nodes)):
+            for j in self.list_by_position(self.graph[nodes[i]]['list'], self.graph):
+                json_dict['links'].append({'source': i, 'target': j, 'value': 1})
 
-    nodes = graph.keys()
-
-    json_dict = {'nodes': [{'name': node} for node in nodes],
-                 'links': []}
-
-    for i in range(0, len(nodes)):
-        graph[nodes[i]] = {'list': graph[nodes[i]], 'position': i}
-
-    for i in range(0, len(nodes)):
-        for j in list_by_position(graph[nodes[i]]['list'], graph):
-            json_dict['links'].append({'source': i, 'target': j, 'value': 1})
-
-    with open(name, 'w') as outfile:
-        json.dump(json_dict, outfile)
+        with open(filename, 'w') as outfile:
+            json.dump(json_dict, outfile)
 
 
 if __name__ == '__main__':
-    from pprint import pprint
 
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         filename='run.log',
                         filemode='a',
                         level=logging.DEBUG)
 
-    db = 'db.sqlite'
+    appConfig = {}
 
-    version(db)
+    with open('app-conf.json') as data_file:
+        appConfig = json.load(data_file)
 
-    appConfig = app_config('app-conf.json')
+    version(appConfig['db-name'])
 
-    #pprint(appConfig)
+    heuristic = UsingHeuristic(appConfig['applications'], appConfig['db-name'])
 
-    graph = {}
-
-    for app in appConfig['applications']:
-        #pprint(app)
-        read_data(db, app, graph)
-
-    logging.debug("graph: {}".format(graph))
-
-    write_graph('viz.json', graph)
+    heuristic.create_sankey(appConfig['sankey-json'])
