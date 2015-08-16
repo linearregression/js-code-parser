@@ -15,7 +15,7 @@ def version(name):
 
         data = cur.fetchone()
 
-        print "SQLite version: %s" % data
+        logging.info("SQLite version: {version}".format(version=data))
 
 
 def my_walker(root_dir, suffix, skip_dirs, callback):
@@ -25,6 +25,7 @@ def my_walker(root_dir, suffix, skip_dirs, callback):
         print('Found directory: %s' % dirName)
         for fname in fileList:
             print('\t%s' % fname)
+
 
 
 class UsingHeuristic:
@@ -37,9 +38,11 @@ class UsingHeuristic:
 
         con = lite.connect(self.db_name)
 
+        self.graph['core'] = set()
         with con:
-            for app in self.apps:
+            for app in apps:
                 self.populate(con, app)
+                self.graph['core'] = self.graph[app['name']] | self.graph['core']
 
     def populate(self, con, app):
         """
@@ -47,61 +50,82 @@ class UsingHeuristic:
         """
 
         cur = con.cursor()
-        cur.execute("SELECT DISTINCT shortcut FROM conf f WHERE f.app = '{app_name}' AND conffile = 'null'"
+        cur.execute("SELECT DISTINCT shortcut FROM conf f "
+                    "WHERE conffile = 'null' "
+                    "AND app = '{app_name}'"
+                    "ORDER BY shortcut "
                     .format(app_name=app['name']))
 
         rows = cur.fetchall()
 
-            #for row in rows:
-            #    print row
+        l = [row[0] for row in rows]
 
-            # logging.debug(rows[0])
-
-        # get all shortcuts
-        a = [node[0] for node in rows]
-
-        self.graph[app['name']] = a
-
-        if 'core' in self.graph:
-            s = set(self.graph['core']) | set(a)
-            self.graph['core'] = [node for node in s]
-        else:
-            self.graph['core'] = a
-
-        for node in rows:
-            self.graph[node[0]] = []
+        self.graph[app['name']] = set(l)
 
     @staticmethod
-    def list_by_position(node_list, graph):
-        return [graph[node]['position'] for node in node_list]
+    def list_by_position(edge_list, graph):
+        logging.debug("edge_list: {edge_list}".format(edge_list=edge_list))
+        return [(graph[edge.keys()[0]]['position'], edge.values()[0]) for edge in edge_list]
 
-    def create_sankey(self, filename):
-        json_dict = {}
+    @staticmethod
+    def group(remaining):
+        return remaining
+
+    def create_viz(self, filename):
+
+        core = self.graph['core']
+
+        # lets start by top folder name
+        common = self.graph['itsi'] & self.graph['dbx']
+
+        itsi = self.graph['itsi'] - common
+        dbx = self.graph['dbx'] - common
+
+        remaining = itsi | dbx
+
+        remaining = self.group(remaining)
+
+        # lets build the graph
+        groups = {
+            'core': [{'common': len(common)}, {'remaining_itsi': len(itsi)}, {'remaining_dbx': len(dbx)}],
+            'itsi': [{'common': len(common)}, {'remaining_itsi': len(itsi)}],
+            'dbx': [{'common': len(common)}, {'remaining_dbx': len(dbx)}],
+            'common': [],
+            'remaining_itsi': [],
+            'remaining_dbx': []
+        }
 
         # pin the nodes in an array
-        nodes = self.graph.keys()
+        nodes = groups.keys()
 
-        json_dict = {'nodes': [{'name': node} for node in nodes],
-                     'links': []}
+        sankey = {'nodes': [{'name': node} for node in nodes],
+                  'links': []}
 
-        # mark position for each node
+        logging.debug("nodes = {nodes}".format(nodes=nodes))
+
+        # add a position attribute for each node
         for i in range(0, len(nodes)):
-            self.graph[nodes[i]] = {'list': self.graph[nodes[i]], 'position': i}
+            i_node = nodes[i]
+            logging.debug("yes {i} {i_node}".format(i=i, i_node=i_node))
+            groups[i_node] = {'edges': groups[i_node], 'position': i}
 
         # start creating edges by position
         for i in range(0, len(nodes)):
-            for j in self.list_by_position(self.graph[nodes[i]]['list'], self.graph):
-                json_dict['links'].append({'source': i, 'target': j, 'value': 1})
+            i_node = nodes[i]
+            for (j, value) in self.list_by_position(groups[i_node]['edges'], groups):
+                logging.debug("j = {j}, value={value}"
+                              .format(j=j, value=value))
+                sankey['links'].append({'source': i, 'target': j, 'value': value})
 
         with open(filename, 'w') as outfile:
-            json.dump(json_dict, outfile)
+            json.dump(sankey, outfile)
 
 
 if __name__ == '__main__':
 
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        filename='run.log',
-                        filemode='a',
+                        #filename='run.log',
+                        #filemode='a',
                         level=logging.DEBUG)
 
     appConfig = {}
@@ -113,4 +137,4 @@ if __name__ == '__main__':
 
     heuristic = UsingHeuristic(appConfig['applications'], appConfig['db-name'])
 
-    heuristic.create_sankey(appConfig['sankey-json'])
+    heuristic.create_viz(appConfig['sankey-json'])
