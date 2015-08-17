@@ -7,3 +7,4 @@ app-conf.json
 *.log
 venv
 resources/public/viz.json
+resources/public/code-list.json

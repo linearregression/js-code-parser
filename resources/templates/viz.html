@@ -4,11 +4,38 @@
     <meta charset="UTF-8">
     <title>code visualizer</title>
     <link rel="stylesheet" type="text/css" href="/css/viz.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/code-list.css"/>
 </head>
-<body>
-<p id="chart">
+<h1>javascript code dependency visualizer</h1>
+<p id="chart"></p>
+<div id="code-category-headings"></div>
+<div id="code-list">
+    <div id="common">
+        <p>common</p>
+        <ol>
+           <li>
+               file 1
+           </li>
+            <li>
+                file 2
+            </li>
+            <li>
+                file 3
+            </li>
+        </ol>
+    </div>
+    <div id="itsi">
+        itsi
+    </div>
+    <div id="dbx">
+        dbx
+    </div>
+</div>
+
+<script src="/js/jquery-2.1.4.min.js"></script>
 <script src="http://d3js.org/d3.v2.min.js?2.9.1"></script>
 <script src="/js/sankey.js"></script>
 <script src="/js/viz.js"></script>
+<script src="/js/code-list.js"></script>
 </body>
 </html>

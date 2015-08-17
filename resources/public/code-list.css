@@ -1,0 +1,21 @@
+.code_category_headings {
+
+}
+
+/* for each label */
+.code_category {
+    float: left;
+    width: 25%;
+}
+
+.code_category_list {
+    float: left;
+}
+
+.code_category_list .module_list {
+    visibility: hidden;
+}
+
+.code_category_list .module_list .module_name {
+
+}

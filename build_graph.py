@@ -39,10 +39,15 @@ class UsingHeuristic:
         con = lite.connect(self.db_name)
 
         self.graph['core'] = set()
+
         with con:
             for app in apps:
                 self.populate(con, app)
-                self.graph['core'] = self.graph[app['name']] | self.graph['core']
+                self.graph['core'] |= self.graph[app['name']]
+
+        self.graph['common'] = set(self.graph['core'])
+        for app in apps:
+            self.graph['common'] &= self.graph[app['name']]
 
     def populate(self, con, app):
         """
@@ -73,27 +78,24 @@ class UsingHeuristic:
 
     def create_viz(self, filename):
 
-        core = self.graph['core']
+        groups = {'common': [],
+                  'core': [{'common': len(self.graph['common'])}]}
 
-        # lets start by top folder name
-        common = self.graph['itsi'] & self.graph['dbx']
+        for group in self.graph.keys():
+            if group != 'core' and group != 'common':
 
-        itsi = self.graph['itsi'] - common
-        dbx = self.graph['dbx'] - common
+                edges = [{'common': len(self.graph['common'])},
+                         {'remaining_{name}'.format(name=group): len(self.graph[group] - self.graph['common'])}]
 
-        remaining = itsi | dbx
+                groups[group] = edges
 
-        remaining = self.group(remaining)
+                groups['remaining_{name}'.format(name=group)] = []
 
-        # lets build the graph
-        groups = {
-            'core': [{'common': len(common)}, {'remaining_itsi': len(itsi)}, {'remaining_dbx': len(dbx)}],
-            'itsi': [{'common': len(common)}, {'remaining_itsi': len(itsi)}],
-            'dbx': [{'common': len(common)}, {'remaining_dbx': len(dbx)}],
-            'common': [],
-            'remaining_itsi': [],
-            'remaining_dbx': []
-        }
+                groups['core'].append(edges[1])
+
+        groups['core'] = list(groups['core'])
+
+        logging.debug("auto coded groups: {groups}".format(groups=groups))
 
         # pin the nodes in an array
         nodes = groups.keys()
@@ -120,6 +122,13 @@ class UsingHeuristic:
         with open(filename, 'w') as outfile:
             json.dump(sankey, outfile)
 
+        graph_json = {}
+        for node in self.graph.keys():
+            graph_json[node] = list(self.graph[node])
+            graph_json[node].sort()
+
+        with open('resources/public/code-list.json', 'w') as outfile:
+            json.dump(graph_json, outfile)
 
 if __name__ == '__main__':
 
