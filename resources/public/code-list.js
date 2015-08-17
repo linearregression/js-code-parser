@@ -23,8 +23,11 @@ $.ajax({
             if (prop === 'common') {
                 continue;
             }
-            headings += "<h3 class='code_category'>"+prop+"</h3>"
-            h += '<div class="code_category_list" id="' + prop + '"><ol class="module_list">';
+            headings += "<h3 class='code_category'>"+prop+"</h3>";
+
+            h += '<div class="code_category_list" id="' + prop + '">' +
+                 '<ol class="module_list">' +
+                 '<lh class="code_category">' + prop + '</lh>';
 
             codelist[prop].forEach(function(module) {
                 var clazz = "module_name";
@@ -39,7 +42,7 @@ $.ajax({
 
         headings += "</div>";
 
-        $("#code-category-headings").html(headings);
+        //$("#code-category-headings").html(headings);
 
         $("#code-list").html(h);
 

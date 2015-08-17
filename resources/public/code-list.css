@@ -1,11 +1,15 @@
-.code_category_headings {
+body {
+    font: 10px sans-serif;
+}
 
+.code_category_headings {
 }
 
 /* for each label */
 .code_category {
     float: left;
     width: 25%;
+    margin-bottom: 10px;
 }
 
 .code_category_list {
@@ -13,7 +17,7 @@
 }
 
 .code_category_list .module_list {
-    display: none;
+    /*display: none;*/
 }
 
 .code_category_list .module_list .module_name {
