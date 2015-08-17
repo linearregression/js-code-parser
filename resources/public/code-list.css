@@ -13,9 +13,13 @@
 }
 
 .code_category_list .module_list {
-    visibility: hidden;
+    display: none;
 }
 
 .code_category_list .module_list .module_name {
 
+}
+
+.code_category_list .module_list .common_module {
+    font-weight: bold;
 }

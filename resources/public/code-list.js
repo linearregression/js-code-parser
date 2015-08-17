@@ -13,12 +13,25 @@ $.ajax({
         var headings = "<div class='code_category_headings'>";
         var h = '';
 
+        var inCommon = {};
+
+        codelist['common'].forEach(function(module) {
+           inCommon[module] = true;
+        });
+
         for (var prop in codelist) {
+            if (prop === 'common') {
+                continue;
+            }
             headings += "<h3 class='code_category'>"+prop+"</h3>"
             h += '<div class="code_category_list" id="' + prop + '"><ol class="module_list">';
 
             codelist[prop].forEach(function(module) {
-                h += "<li class='module_name'>" + module + "</li>";
+                var clazz = "module_name";
+                if (inCommon[module]) {
+                    clazz += " common_module";
+                }
+                h += "<li class='" + clazz + "'>" + module + "</li>";
             });
 
             h += "</ol></div>";
@@ -36,7 +49,7 @@ $.ajax({
             console.log("hey somebody clicked me!!" + listName);
             //console.log($(listName));
             console.log($(listName));
-            $(listName).css('visibility', 'visible');
+            $(listName).css('display', 'block');
         });
     }
 });
