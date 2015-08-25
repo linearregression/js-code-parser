@@ -9,7 +9,7 @@
 $.ajax({
     url: "/json/code-list.json",
     success: function(codelist) {
-        var headings = "<div class='code_category_headings'>";
+        var headings = "<div class='code_category_headings'><label class='module_selector_label'>app name: <select>";
         var h = '';
 
         var inCommon = {};
@@ -23,11 +23,13 @@ $.ajax({
                 continue;
             }
 
-            headings += "<h3 class='code_category'>"+prop+"</h3>";
+            if (prop !== 'core') {
+                headings += "<option value='" + prop + "'>" + prop + "</option>";
+            }
 
             h += '<div class="code_category_list" id="' + prop + '">' +
                  '<ol class="module_list">' +
-                 '<lh class="code_category">' + prop + '</lh>';
+                 '<lh class="module_list_title">' + prop + '</lh>';
 
             codelist[prop].forEach(function(module) {
                 var clazz = "module_name";
@@ -40,19 +42,30 @@ $.ajax({
             h += "</ol></div>";
         }
 
-        headings += "</div>";
+        headings += "</select></label></div>";
 
-        //$("#code-category-headings").html(headings);
+        $("#code-category-headings").html(headings);
 
         $("#code-list").html(h);
 
-        $(".code_category").click(function() {
-            console.log($(this));
-            var listName = "#" + $(this).context.innerText + " ol";
+        // the core block is always visible
+        $("#core ol").css('display', 'block');
+
+        var prevCodeBlock = "#ess ol";
+
+        $(prevCodeBlock).css('display', 'block');
+
+        $(".code_category_headings select").change(function() {
+            console.log($(this).val());
+            var listName = "#" + $(this).val() + " ol";
             console.log("hey somebody clicked me!!" + listName);
             //console.log($(listName));
-            console.log($(listName));
+            console.log("show: " + $(listName) + "hide: " + prevCodeBlock);
+            if (prevCodeBlock) {
+                $(prevCodeBlock).css('display', 'none');
+            }
             $(listName).css('display', 'block');
+            prevCodeBlock = listName;
         });
     }
 });
