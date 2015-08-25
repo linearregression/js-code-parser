@@ -37,8 +37,9 @@ var sendFile = function(res, dir, file) {
 };
 
 app.get('/', function (req, res) {
-
-    sendFile(res, '/resources/templates/', 'viz.html');
+    var version = req.query.v;
+    if (!version) version = '';
+    sendFile(res, '/resources/templates/', 'viz' + version + '.html');
 });
 
 app.get('/:type(json|js|css)/:file', function (req, res) {

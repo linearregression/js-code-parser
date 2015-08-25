@@ -152,28 +152,31 @@ var defineParser = function (content, fname, app) {
             }
 
             var args = firstStatement.expression['arguments'][0].elements;
+            if (!args) {
+                console.log("WARN: fname: " + fname + " json: skipping for now");
+            } else {
+                db.serialize(function () {
+                    var data = {$app: app.name, $filename: fname.replace(app.stem, '')};
+                    db.run("insert into code(app, filename) values($app, $filename)", data);
+                    db.get("select codeid from code where app = $app and filename = $filename", data, function (err, row) {
+                        if (err) {
+                            console.log("ERROR:" + app.name + ":" + ":fetching code id");
+                            return;
+                        }
 
-            db.serialize(function () {
-                var data = {$app: app.name, $filename: fname.replace(app.stem, '')};
-                db.run("insert into code(app, filename) values($app, $filename)", data);
-                db.get("select codeid from code where app = $app and filename = $filename", data, function (err, row) {
-                    if (err) {
-                        console.log("ERROR:" + app.name + ":" + ":fetching code id");
-                        return;
-                    }
-
-                    //console.log("INFO:codeid: " + row.codeid);
-                    args.forEach(function (val) {
-                        db.run("insert into uses(codeid, module) values($codeid, $module)",
-                            {
-                                $codeid: row.codeid,
-                                $module: val.value
-                            });
-                        //console.log(val.value);
+                        //console.log("INFO:codeid: " + row.codeid);
+                        args.forEach(function (val) {
+                            db.run("insert into uses(codeid, module) values($codeid, $module)",
+                                {
+                                    $codeid: row.codeid,
+                                    $module: val.value
+                                });
+                            //console.log(val.value);
+                        });
                     });
                 });
-            });
-            //console.log(args);
+                //console.log(args);
+            }
         }
     } catch (err) {
         console.log(JSON.stringify(json, null, 2));
@@ -191,6 +194,15 @@ var processArgs = function () {
     var appConfig = JSON.parse(fs.readFileSync(argv.c, 'utf8'));
 
     appConfig.applications.forEach(function (app) {
+        var skip = false;
+
+        if (argv.a && app.name !== argv.a) {
+            skip = true;
+        }
+
+        if (!skip) {
+            console.log("working for app: " + app.name);
+        }
 
         readContents(app.js, ".js", app.skip, function (err, filename, contents) {
             defineParser(contents, filename, app);
@@ -201,6 +213,7 @@ var processArgs = function () {
         });
 
         associateDBContents(app, app.shared, ".js");
+
     });
 };
 

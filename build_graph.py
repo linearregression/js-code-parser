@@ -4,6 +4,7 @@ import sqlite3 as lite
 import logging
 import json
 import os
+import fnmatch
 
 def version(name):
     con = lite.connect(name)
@@ -25,7 +26,6 @@ def my_walker(root_dir, suffix, skip_dirs, callback):
         print('Found directory: %s' % dirName)
         for fname in fileList:
             print('\t%s' % fname)
-
 
 
 class UsingHeuristic:
