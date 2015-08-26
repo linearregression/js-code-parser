@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "node_modules/.bin/nodemon d.js",
-    "test": "rm -rf db.sqlite; node x.js -c app-conf.json; node y.js -c app-conf.json"
+    "test": "rm -rf db.sqlite; node x.js -c app-conf.json; python build_graph.py"
   },
   "keywords": [
     "code",
