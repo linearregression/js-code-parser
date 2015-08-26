@@ -121,7 +121,7 @@ class UsingHeuristic:
 
     @staticmethod
     def list_by_position(edge_list, graph):
-        logging.debug("edge_list: {edge_list}".format(edge_list=edge_list))
+        # logging.debug("edge_list: {edge_list}".format(edge_list=edge_list))
         return [(graph[edge.keys()[0]]['position'], edge.values()[0]) for edge in edge_list]
 
     @staticmethod
@@ -147,7 +147,7 @@ class UsingHeuristic:
 
         groups['core'] = list(groups['core'])
 
-        logging.debug("auto coded groups: {groups}".format(groups=groups))
+        # logging.debug("auto coded groups: {groups}".format(groups=groups))
 
         # pin the nodes in an array
         nodes = groups.keys()
@@ -155,20 +155,19 @@ class UsingHeuristic:
         sankey = {'nodes': [{'name': node} for node in nodes],
                   'links': []}
 
-        logging.debug("nodes = {nodes}".format(nodes=nodes))
+        # logging.debug("nodes = {nodes}".format(nodes=nodes))
 
         # add a position attribute for each node
         for i in range(0, len(nodes)):
             i_node = nodes[i]
-            logging.debug("yes {i} {i_node}".format(i=i, i_node=i_node))
+            # logging.debug("yes {i} {i_node}".format(i=i, i_node=i_node))
             groups[i_node] = {'edges': groups[i_node], 'position': i}
 
         # start creating edges by position
         for i in range(0, len(nodes)):
             i_node = nodes[i]
             for (j, value) in self.list_by_position(groups[i_node]['edges'], groups):
-                logging.debug("j = {j}, value={value}"
-                              .format(j=j, value=value))
+                # logging.debug("j = {j}, value={value}".format(j=j, value=value))
                 sankey['links'].append({'source': i, 'target': j, 'value': value})
 
         with open(filename, 'w') as outfile:
