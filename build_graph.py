@@ -1,22 +1,12 @@
+
 __author__ = 'sumeet'
 
-import sqlite3 as lite
 import logging
 import json
 import os
 import fnmatch
-
-def version(name):
-    con = lite.connect(name)
-
-    with con:
-
-        cur = con.cursor()
-        cur.execute('SELECT SQLITE_VERSION()')
-
-        data = cur.fetchone()
-
-        logging.info("SQLite version: {version}".format(version=data))
+import subprocess
+import db_saver
 
 
 def find(pattern, path, skip_dirs):
@@ -37,87 +27,76 @@ def find(pattern, path, skip_dirs):
 
     return result
 
-class AssociateCode:
+class DependencyExtractor:
 
-    def __init__(self, apps, db_name):
-        self.apps = apps
-        self.db_name = db_name
-        pass
+    def __init__(self, app_name, js_loc, ignored_locs):
+        self.ignored_locs = ignored_locs
+        self.js_loc = js_loc
+        self.app_name = app_name
 
-        con = lite.connect(self.db_name)
+    def extract(self):
+        js_files = find("*.js", self.js_loc, self.ignored_locs)
+        file_info = {}
+        for js_file in js_files:
+            info = self._parse_file_using_node(js_file)
+            file_info[js_file] = info
+            msg = "parsed file: {file} includes: {num}".format(file=js_file, num=len(info))
+            if len(info) == 0:
+                logging.warn(msg)
+            else:
+                pass
+                # logging.debug(msg)
 
-        with con:
-            for app in apps:
-                self.associate(con, app)
+        # logging.debug("info: {file_info}".format(file_info=file_info))
+
+        return file_info
 
     @staticmethod
-    def associate(con, app):
-        cur = con.cursor()
-        sql = "select distinct u.module " \
-              "from uses u, code c " \
-              "where c.app = '{app}' " \
-              "and u.codeid = c.codeid " \
-              "order by u.module".format(app=app['name'])
+    def _parse_file_using_node(filename):
+        jsp = subprocess.Popen(["node", "extract_info.js", filename], stdout=subprocess.PIPE)
+        return_code = jsp.wait()
+        if return_code != 0:
+            logging.error("UNABLE to parse {filename}".format(filename=filename))
+            return dict()
 
-        cur.execute(sql)
+        p = ''.join([line.rstrip() for line in jsp.stdout.readlines()])
 
-        rows = cur.fetchall()
+        # logging.debug("filename: {filename} parsed json: {p}".format(filename=filename, p=p))
 
-        logging.debug("sql: {sql} fetched {num_rows} rows".format(sql=sql, num_rows=len(rows)))
+        return json.loads(p)
 
-        cur.close()
-        cur = con.cursor()
-
-        for row in rows:
-            files = find("{module}.js".format(module=row[0]), app['shared'], app['skip'])
+    def conf_entries(self, app_modules, shared_loc):
+        shared_files = []
+        for module in app_modules:
+            files = find("{module}.js".format(module=module), shared_loc, self.ignored_locs)
             if len(files) == 1:
-                cur.execute("insert into conf(app, conffile, shortcut, filename) "
-                            "values('{app}', '{conffile}', '{shortcut}', '{filename}')"
-                            .format(app=app['name'], conffile='null', shortcut=row[0], filename=files[0]))
-                logging.debug("inserting row in conf({app},{shortcut})".format(app=app['name'], shortcut=row[0]))
+                shared_files.append({
+                    'app': self.app_name,
+                    'conffile': 'null',
+                    'shortcut': module,
+                    'filename': files[0]
+                })
 
-        cur.close()
+        return shared_files
 
 
 class UsingHeuristic:
 
     graph = {}
 
-    def __init__(self, apps, db_name):
+    def __init__(self, apps, db_handle):
         self.apps = apps
-        self.db_name = db_name
-
-        con = lite.connect(self.db_name)
 
         self.graph['core'] = set()
 
-        with con:
-            for app in apps:
-                self.populate(con, app)
-                self.graph['core'] |= self.graph[app['name']]
+        for app in apps:
+            self.graph[app['name']] = set(db_handle.fetch_shortcuts(app['name']))
+            self.graph['core'] |= self.graph[app['name']]
 
         self.graph['common'] = set(self.graph['core'])
+
         for app in apps:
             self.graph['common'] &= self.graph[app['name']]
-
-    def populate(self, con, app):
-        """
-        reading data from db
-        """
-
-        cur = con.cursor()
-        cur.execute("SELECT DISTINCT shortcut "
-                    "FROM conf f "
-                    "WHERE conffile = 'null' "
-                    "AND app = '{app_name}'"
-                    "ORDER BY shortcut "
-                    .format(app_name=app['name']))
-
-        rows = cur.fetchall()
-
-        l = [row[0] for row in rows]
-
-        self.graph[app['name']] = set(l)
 
     @staticmethod
     def list_by_position(edge_list, graph):
@@ -181,6 +160,7 @@ class UsingHeuristic:
         with open('resources/public/code-list.json', 'w') as outfile:
             json.dump(graph_json, outfile)
 
+
 if __name__ == '__main__':
 
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -193,10 +173,22 @@ if __name__ == '__main__':
     with open('app-conf.json') as data_file:
         appConfig = json.load(data_file)
 
-    version(appConfig['db-name'])
+    db = db_saver.DbSaver(appConfig['db-name'])
 
-    AssociateCode(appConfig['applications'], appConfig['db-name'])
+    apps = [app for app in appConfig['applications'] if app['name'] == 'ess']
 
-    heuristic = UsingHeuristic(appConfig['applications'], appConfig['db-name'])
+    for app in apps:
+        # extract defines and configs from js files
+        extractor = DependencyExtractor(app['name'], app['js'], app['skip'])
+        info = extractor.extract()
+        db.save_dependencies(app['name'], info)
+
+        # find module coverage from shared
+        modules = db.fetch_modules(app['name'])
+        conf_entries = extractor.conf_entries(modules, app['shared'])
+        db.save_conf(conf_entries)
+
+    # build visualization
+    heuristic = UsingHeuristic(apps, db)
 
     heuristic.create_viz(appConfig['sankey-json'])

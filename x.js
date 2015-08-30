@@ -133,8 +133,7 @@ var defineParser = function (content, fname, app) {
         throw "ERROR:" + app.name + ":" + fname + ":parsing:" + err;
     }
 
-    //console.log(JSON.stringify(json, null, 2));
-    //
+    //console.log("file: " + fname + " " + JSON.stringify(json, null, 2));
 
     try {
         var firstStatement = json.body[0];
@@ -184,11 +183,6 @@ var defineParser = function (content, fname, app) {
     }
 };
 
-var associateDBContents = function (app, shared, extension) {
-    console.log("i am here, app: " + app.name);
-
-};
-
 var processArgs = function () {
     var argv = require('minimist')(process.argv.slice(2));
     var appConfig = JSON.parse(fs.readFileSync(argv.c, 'utf8'));
@@ -202,6 +196,8 @@ var processArgs = function () {
 
         if (!skip) {
             console.log("working for app: " + app.name);
+        } else {
+            return;
         }
 
         readContents(app.js, ".js", app.skip, function (err, filename, contents) {
@@ -211,8 +207,6 @@ var processArgs = function () {
         readContents(app.html, ".html", app.skip, function (err, filename, contents) {
             htmlParser(contents, filename, app);
         });
-
-        associateDBContents(app, app.shared, ".js");
 
     });
 };
