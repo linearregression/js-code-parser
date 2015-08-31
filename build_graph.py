@@ -175,7 +175,7 @@ if __name__ == '__main__':
 
     db = db_saver.DbSaver(appConfig['db-name'])
 
-    apps = [app for app in appConfig['applications'] if app['name'] == 'ess']
+    apps = [app for app in appConfig['applications']]
 
     for app in apps:
         # extract defines and configs from js files

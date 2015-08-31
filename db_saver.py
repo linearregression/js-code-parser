@@ -97,6 +97,7 @@ class DbSaver:
             cur = con.cursor()
 
             for filename in config_defines:
+                logging.debug("processing filename: {filename}".format(filename=filename))
                 cur.execute(code_sql.format(app_name=app_name, filename=filename))
                 codeid = cur.lastrowid
 
