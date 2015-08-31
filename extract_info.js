@@ -55,14 +55,16 @@ function processDefine(node) {
     if ( node.type === 'ArrayExpression') {
 
         node.elements.forEach(function (module) {
-            printEntry({
-                type: 'uses',
-                name: module.value
-            });
 
             if (!module.raw) {
                 console.error("ERROR: file: " + filename + " module json: " + JSON.stringify(module, null, 2));
+            } else {
+                printEntry({
+                    type: 'uses',
+                    name: module.value
+                });
             }
+
         });
 
         defineStatements.pop();
