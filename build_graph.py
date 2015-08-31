@@ -161,12 +161,48 @@ class UsingHeuristic:
             json.dump(graph_json, outfile)
 
 
+def usage(message=None):
+    code = 0
+    if message:
+        print message
+        code = 1
+    print "usage: build_graph.py [-h] -c|--config <app-conf.json> -l|--log <debug|info|warn|error>"
+    sys.exit(code)
+
 if __name__ == '__main__':
+
+    import getopt
+    import sys
+
+    opts = None
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],
+                                   "hc:l:",
+                                   ["help", "config=", "log="])
+    except getopt.GetoptError as err:
+        usage(err)
+
+    config = 'app-conf.json'
+    loglevel = 'INFO'
+
+    for option, argument in opts:
+        if option in ('-c', '--config'):
+            config = argument
+        elif option in ('-l', '--log'):
+            loglevel = argument
+        elif option in ('-h', '--help'):
+            usage()
+        else:
+            assert False, "unhandled option"
+
+    numeric_level = getattr(logging, loglevel.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError('Invalid log level: %s' % loglevel)
 
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         #filename='run.log',
                         #filemode='a',
-                        level=logging.DEBUG)
+                        level=numeric_level)
 
     appConfig = {}
 

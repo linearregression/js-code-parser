@@ -9,7 +9,14 @@ var estraverse = require('estraverse');
 
 var filename = process.argv[2];
 //console.log('Processing', filename);
-var ast = esprima.parse(fs.readFileSync(filename), {loc: true});
+var ast = null;
+
+try {
+    ast = esprima.parse(fs.readFileSync(filename), {loc: true});
+} catch (err) {
+    console.error("unable to parse file: " + filename + " error: " + err.message);
+    process.exit(1);
+}
 
 var defineStatements = [];
 var configStatements = [];
