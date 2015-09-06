@@ -8,8 +8,17 @@ body {
 /* for each label */
 .code_category {
     float: left;
-    width: 25%;
+    width: 50%;
     margin-bottom: 10px;
+    font-weight: bold;
+    font-size: large;
+}
+
+.module_selector_label {
+    font-weight: bold;
+}
+
+.module_list_title {
     font-weight: bold;
     font-size: large;
 }
@@ -19,13 +28,16 @@ body {
 }
 
 .code_category_list .module_list {
-    /*display: none;*/
+    display: none;
 }
 
 .code_category_list .module_list .module_name {
-
 }
 
 .code_category_list .module_list .common_module {
     font-weight: bold;
+}
+
+.code_category_list .module_list .common_with_core {
+    color: cornflowerblue;
 }

@@ -9,3 +9,4 @@ app-conf.json
 venv
 resources/public/viz.json
 resources/public/code-list.json
+build

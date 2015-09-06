@@ -1,6 +1,11 @@
+/* global require, process */
+
 /**
+ * parse require & define statements
  * Created by sumeet on 8/26/15.
  */
+
+(function(){
 'use strict';
 
 var fs = require('fs');
@@ -31,9 +36,9 @@ console.log("]");
 
 function isDefine(node) {
     return (
-    node.type === 'CallExpression'
-    && node.callee.type === 'Identifier'
-    && (node.callee.name === 'define' || node.callee.name === 'require'));
+    node.type === 'CallExpression' &&
+    node.callee.type === 'Identifier' &&
+    (node.callee.name === 'define' || node.callee.name === 'require'));
 }
 
 function isConfig(node) {
@@ -41,10 +46,10 @@ function isConfig(node) {
     // define or require need a non 0 length array argument
 
     return (
-    node.type === 'CallExpression'
-    && node.callee.object
-    && node.callee.object.name === 'require'
-    && node.callee.property.name === 'config');
+    node.type === 'CallExpression' &&
+    node.callee.object &&
+    node.callee.object.name === 'require' &&
+    node.callee.property.name === 'config');
 }
 
 function printEntry(entry) {
@@ -55,7 +60,7 @@ function printEntry(entry) {
 }
 
 function processDefine(node) {
-    if (defineStatements.length == 0) {
+    if (defineStatements.length === 0) {
         return;
     }
 
@@ -75,9 +80,7 @@ function processDefine(node) {
         });
 
         defineStatements.pop();
-    } else if (node.type === 'CallExpression'
-                && node.callee.type === 'Identifier'
-                && node.callee.name === 'require') {
+    } else if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && node.callee.name === 'require') {
         printEntry({
             type: 'uses',
             name: node.arguments[0].value
@@ -92,7 +95,7 @@ function processDefine(node) {
 }
 
 function processConfig(node) {
-    if (configStatements.length == 0 || node.type !== 'Property' || node.key.name !== 'paths') {
+    if (configStatements.length === 0 || node.type !== 'Property' || node.key.name !== 'paths') {
         return;
     }
 
@@ -133,3 +136,4 @@ function enter(node){
     }
 
 }
+})();

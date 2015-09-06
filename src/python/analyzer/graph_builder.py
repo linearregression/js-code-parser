@@ -1,4 +1,3 @@
-
 __author__ = 'sumeet'
 
 import logging
@@ -7,10 +6,11 @@ import os
 import fnmatch
 import subprocess
 import db_saver
+import sys
 
 
 def find(pattern, path, skip_dirs):
-    #logging.debug("pattern: {pattern} path: {path} skip_dirs: {skip_dirs}"
+    # logging.debug("pattern: {pattern} path: {path} skip_dirs: {skip_dirs}"
     #              .format(pattern=pattern, path=path, skip_dirs=skip_dirs))
 
     result = []
@@ -27,12 +27,13 @@ def find(pattern, path, skip_dirs):
 
     return result
 
-class DependencyExtractor:
 
-    def __init__(self, app_name, js_loc, ignored_locs):
+class DependencyExtractor:
+    def __init__(self, app_name, js_loc, ignored_locs, parser):
         self.ignored_locs = ignored_locs
         self.js_loc = js_loc
         self.app_name = app_name
+        self.parser = parser
 
     def extract(self):
         js_files = find("*.js", self.js_loc, self.ignored_locs)
@@ -51,9 +52,8 @@ class DependencyExtractor:
 
         return file_info
 
-    @staticmethod
-    def _parse_file_using_node(filename):
-        jsp = subprocess.Popen(["node", "extract_info.js", filename], stdout=subprocess.PIPE)
+    def _parse_file_using_node(self, filename):
+        jsp = subprocess.Popen(["node", self.parser, filename], stdout=subprocess.PIPE)
         return_code = jsp.wait()
         if return_code != 0:
             logging.error("UNABLE to parse {filename}".format(filename=filename))
@@ -81,7 +81,6 @@ class DependencyExtractor:
 
 
 class UsingHeuristic:
-
     graph = {}
 
     def __init__(self, apps, db_handle):
@@ -107,14 +106,13 @@ class UsingHeuristic:
     def group(remaining):
         return remaining
 
-    def create_viz(self, filename):
+    def create_viz(self, viz_file, code_file):
 
         groups = {'common': [],
                   'core': [{'common': len(self.graph['common'])}]}
 
         for group in self.graph.keys():
             if group != 'core' and group != 'common':
-
                 edges = [{'common': len(self.graph['common'])},
                          {'remaining_{name}'.format(name=group): len(self.graph[group] - self.graph['common'])}]
 
@@ -149,7 +147,7 @@ class UsingHeuristic:
                 # logging.debug("j = {j}, value={value}".format(j=j, value=value))
                 sankey['links'].append({'source': i, 'target': j, 'value': value})
 
-        with open(filename, 'w') as outfile:
+        with open(viz_file, 'w') as outfile:
             json.dump(sankey, outfile)
 
         graph_json = {}
@@ -157,7 +155,7 @@ class UsingHeuristic:
             graph_json[node] = list(self.graph[node])
             graph_json[node].sort()
 
-        with open('resources/public/code-list.json', 'w') as outfile:
+        with open(code_file, 'w') as outfile:
             json.dump(graph_json, outfile)
 
 
@@ -166,30 +164,35 @@ def usage(message=None):
     if message:
         print message
         code = 1
-    print "usage: build_graph.py [-h] -c|--config <app-conf.json> -l|--log <debug|info|warn|error>"
+    print "usage: build_graph.py [-h] -c|--config <app-conf.json> -l|--log <debug|info|warn|error> -p <parser> -o <dir>"
     sys.exit(code)
 
-if __name__ == '__main__':
 
+def main():
     import getopt
-    import sys
 
     opts = None
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                                   "hc:l:",
-                                   ["help", "config=", "log="])
+                                   "hc:l:p:o:",
+                                   ["help", "config=", "log=", "parser=", "output="])
     except getopt.GetoptError as err:
         usage(err)
 
-    config = 'app-conf.json'
+    config_file = 'app-conf.json'
     loglevel = 'INFO'
+    parser = 'parser.js'
+    output_dir = 'resources'
 
     for option, argument in opts:
         if option in ('-c', '--config'):
-            config = argument
+            config_file = argument
+        elif option in ('-o', '--output'):
+            output_dir = argument
         elif option in ('-l', '--log'):
             loglevel = argument
+        elif option in ('-p', '--parser'):
+            parser = argument
         elif option in ('-h', '--help'):
             usage()
         else:
@@ -200,22 +203,25 @@ if __name__ == '__main__':
         raise ValueError('Invalid log level: %s' % loglevel)
 
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        #filename='run.log',
-                        #filemode='a',
+                        # filename='run.log',
+                        # filemode='a',
                         level=numeric_level)
 
-    appConfig = {}
+    logging.debug("config: {config}, parser: {parser}".format(config=config_file, parser=parser))
 
-    with open('app-conf.json') as data_file:
-        appConfig = json.load(data_file)
+    app_config = {}
 
-    db = db_saver.DbSaver(appConfig['db-name'])
+    with open(config_file) as data_file:
+        app_config = json.load(data_file)
 
-    apps = [app for app in appConfig['applications']]
+    db = db_saver.DbSaver(app_config['db-name'])
+
+    # apps = [app for app in app_config['applications'] if app['name'] == 'stream']
+    apps = [app for app in app_config['applications']]
 
     for app in apps:
         # extract defines and configs from js files
-        extractor = DependencyExtractor(app['name'], app['js'], app['skip'])
+        extractor = DependencyExtractor(app['name'], app['js'], app['skip'], parser)
         info = extractor.extract()
         db.save_dependencies(app['name'], info)
 
@@ -225,6 +231,11 @@ if __name__ == '__main__':
         db.save_conf(conf_entries)
 
     # build visualization
-    heuristic = UsingHeuristic(apps, db)
+    code_file = os.path.join(output_dir, app_config['code-json'])
+    viz_file = os.path.join(output_dir, app_config['sankey-json'])
 
-    heuristic.create_viz(appConfig['sankey-json'])
+    UsingHeuristic(apps, db).create_viz(viz_file=viz_file, code_file=code_file)
+
+
+if __name__ == '__main__':
+    main()
