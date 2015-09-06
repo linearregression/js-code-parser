@@ -17,14 +17,14 @@ class DbSaver:
 
             data = cur.fetchone()
 
-            cur.execute("CREATE TABLE IF NOT EXISTS code(codeid INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        " app VARCHAR(10), filename VARCHAR(20))")
+            cur.execute('CREATE TABLE IF NOT EXISTS code(codeid INTEGER PRIMARY KEY AUTOINCREMENT,'
+                        ' app VARCHAR(10), filename VARCHAR(20))')
 
-            cur.execute("CREATE TABLE IF NOT EXISTS uses(usesid INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        " codeid INTEGER, module VARCHAR(20))")
+            cur.execute('CREATE TABLE IF NOT EXISTS uses(usesid INTEGER PRIMARY KEY AUTOINCREMENT,'
+                        ' codeid INTEGER, module VARCHAR(20))')
 
-            cur.execute("CREATE TABLE IF NOT EXISTS conf(confid INTEGER PRIMARY KEY AUTOINCREMENT, "
-                        "app VARCHAR(10), conffile VARCHAR(20), shortcut VARCHAR(10), filename VARCHAR(20))")
+            cur.execute('CREATE TABLE IF NOT EXISTS conf(confid INTEGER PRIMARY KEY AUTOINCREMENT, '
+                        'app VARCHAR(10), conffile VARCHAR(20), shortcut VARCHAR(10), filename VARCHAR(20))')
 
             cur.close()
 

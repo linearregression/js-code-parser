@@ -1,7 +1,10 @@
+/* global require, __dirname, console */
+
 /**
+ * serve the application
  * Created by sumeet on 8/9/15.
  */
-
+(function() {
 'use strict';
 
 var express = require('express');
@@ -9,8 +12,6 @@ var app = express();
 var sqlite3 = require('sqlite3').verbose();
 var util = require('util');
 var fs = require('fs');
-var appConfig = JSON.parse(fs.readFileSync('app-conf.json', 'utf8'));
-
 
 var db;
 
@@ -36,28 +37,31 @@ var sendFile = function(res, dir, file) {
     });
 };
 
-app.get('/', function (req, res) {
-    var version = req.query.v;
-    if (!version) version = '';
-    sendFile(res, '/resources/templates/', 'viz' + version + '.html');
-});
+    app.get('/', function (req, res) {
+        var version = req.query.v;
+        if (!version) version = '';
+        sendFile(res, '/resources/templates/', 'viz' + version + '.html');
+    });
 
-app.get('/:type(json|js|css)/:file', function (req, res) {
+    app.get('/js/vendor/:file', function (req, res) {
+
+        console.log("Requested: " + req.params.file);
+
+        sendFile(res, '/resources/public/vendor', req.params.file);
+    });
+
+    app.get('/:type(json|js|css)/:file', function (req, res) {
 
     console.log("Requested: " + req.params.file);
 
-    sendFile(res, '/resources/public/', req.params.file);
-});
+    var dir = '/resources/public/';
+    if (req.params.type === 'json') {
+        dir = '/resources/'
+    }
 
-app.post('/json/:file', function(req, res) {
+    console.log("type: " + req.params.type + " file: " + req.params.file);
 
-    console.log("generating file: " + req.params.file);
-    
-    db.serialize(function() {
-
-    });
-
-    res.sendStatus(200);
+    sendFile(res, dir, req.params.file);
 });
 
 var server = app.listen(3000, function () {
@@ -70,3 +74,4 @@ var server = app.listen(3000, function () {
 
     console.log('visualizer app listening at http://%s:%s', host, port);
 });
+})();
