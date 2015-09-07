@@ -41,12 +41,6 @@ module.exports = function(grunt) {
                 src: 'resources/**/*',
                 dest: 'build/website/'
             },
-            require_js: {
-                src: 'node_modules/requirejs/require.js',
-                dest: 'build/website/resources/public/vendor/',
-                flatten: true,
-                expand: true
-            },
             index_js: {
                 src: 'src/js/index.js',
                 dest: 'build/website/resources/public/',
@@ -66,6 +60,17 @@ module.exports = function(grunt) {
                 dest: 'build/website/resources/public/components',
                 flatten: true,
                 expand: true
+            },
+            libs: {
+                src: [
+                    'node_modules/backbone/backbone-min.js',
+                    'node_modules/backbone/node_modules/underscore/underscore-min.js',
+                    'node_modules/jquery/dist/jquery.min.js',
+                    'node_modules/requirejs/require.js'
+                ],
+                dest: 'build/website/resources/public/vendor',
+                expand: true,
+                flatten: true
             }
         },
 

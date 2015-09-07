@@ -9,11 +9,25 @@
 // directory.
 require.config({
     baseUrl: 'static/components',
+    shim: {
+        underscore: {
+            exports: '_'
+        },
+        backbone: {
+            deps: [
+                'underscore',
+                'jquery'
+            ],
+            exports: 'Backbone'
+        }
+    },
     paths: {
         index: '../index',
         vendor: '../vendor',
         d3: "http://d3js.org/d3.v3.min",
-        jquery: "../vendor/jquery-2.1.4.min"
+        jquery: "../vendor/jquery.min",
+        backbone: "../vendor/backbone-min",
+        underscore: "../vendor/underscore-min"
     }//,
     //nodeRequire: require
 });
