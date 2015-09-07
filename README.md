@@ -2,18 +2,11 @@
 
 A program to calculate & visualize dependencies among amd js applications.
 
-## generate data ##
+## configure ##
 
-checkout various applications
+in `src/python/analyzer/app-conf.json`:
 
-    $ node x.js -c app-conf.json
-    
-## visualize ##
-
-    $ node d.js
-
-## config file format ##
-
+```json
     {
       "program": "code visualizer",
       "applications": [
@@ -26,3 +19,16 @@ checkout various applications
         } 
       ]
     }
+```
+
+## build ##
+
+checkout various applications
+
+    $ grunt clean analyzer
+    
+## visualize ##
+
+    $ cd build/website; node server.js
+    $ open http://localhost:3000
+
