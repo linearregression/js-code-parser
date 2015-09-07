@@ -17,12 +17,6 @@ module.exports = function(grunt) {
         },
 
         copy: {
-            website: {
-                src: 'src/js/server.js',
-                dest: 'build/website/',
-                flatten: true,
-                expand: true
-            },
             batch: {
                 src: '**',
                 cwd: 'src/python/analyzer',
@@ -30,9 +24,15 @@ module.exports = function(grunt) {
                 flatten: true,
                 expand: true
             },
-            parser: {
+            batch_parser: {
                 src:'src/js/parser.js',
                 dest: 'build/analyzer/',
+                flatten: true,
+                expand: true
+            },
+            website: {
+                src: 'src/js/server.js',
+                dest: 'build/website/',
                 flatten: true,
                 expand: true
             },
@@ -41,13 +41,13 @@ module.exports = function(grunt) {
                 src: 'resources/**/*',
                 dest: 'build/website/'
             },
-            index_js: {
-                src: 'src/js/index.js',
+            page_config: {
+                src: 'src/js/index-config.js',
                 dest: 'build/website/resources/public/',
                 flatten: true,
                 expand: true
             },
-            index_tree: {
+            page_tree: {
                 cwd: 'src/js/index',
                 src: '*.js',
                 dest: 'build/website/resources/public/index',
