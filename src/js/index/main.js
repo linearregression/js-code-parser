@@ -1,6 +1,6 @@
 /* global define */
 
-define(['./messages', 'viz', 'print'], function (messages, viz, print) {
+define(['./messages', 'viz', 'print', './code'], function (messages, viz, print, code) {
 
     viz.addSankey(false, true, 'chart', "/json/viz.json");
 
