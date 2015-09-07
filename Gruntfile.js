@@ -66,7 +66,8 @@ module.exports = function(grunt) {
                     'node_modules/backbone/backbone-min.js',
                     'node_modules/backbone/node_modules/underscore/underscore-min.js',
                     'node_modules/jquery/dist/jquery.min.js',
-                    'node_modules/requirejs/require.js'
+                    'node_modules/requirejs/require.js',
+                    'node_modules/d3/d3.min.js'
                 ],
                 dest: 'build/website/resources/public/vendor',
                 expand: true,
@@ -88,7 +89,6 @@ module.exports = function(grunt) {
 
     });
 
-    // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-copy');

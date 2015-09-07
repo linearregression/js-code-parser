@@ -5,8 +5,14 @@
  * Created by sumeet on 8/16/15.
  */
 
-define(['jquery'], function ($) {
+define(['jquery', 'backbone'], function ($, Backbone) {
     'use strict';
+
+    console.log("Backbone: " + Backbone);
+
+    var Code = Backbone.Model.extend({
+        url: '/json/code.json'
+    });
 
     //$("#code-list").html("<h1>hello</h1>")
 
