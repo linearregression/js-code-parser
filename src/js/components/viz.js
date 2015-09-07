@@ -1,7 +1,7 @@
 /* global define */
 
 
-define(['vendor/jquery-2.1.4.min','sankey', 'd3', 'print'], function ($, sankey, d3, print) {
+define(['jquery','sankey', 'd3', 'print'], function ($, sankey, d3, print) {
 
     print("d3 = " + d3 + " $ = " + $);
 

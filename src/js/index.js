@@ -11,8 +11,9 @@ require.config({
     baseUrl: 'components',
     paths: {
         index: '../index',
-        vendor: '/static/vendor',
-        d3: "http://d3js.org/d3.v3.min"
+        vendor: '../vendor',
+        d3: "http://d3js.org/d3.v3.min",
+        jquery: "../vendor/jquery-2.1.4.min"
     }//,
     //nodeRequire: require
 });
