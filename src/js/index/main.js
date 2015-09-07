@@ -1,8 +1,8 @@
 /* global define */
 
-define(['./messages', 'viz', 'print', './code'], function (messages, viz, print, code) {
+/** convention: reusable components don't start with ./
+ */
+define(['viz', './code'], function (viz, code) {
 
     viz.addSankey(false, true, 'chart', "/json/viz.json");
-
-    print(messages.getHello());
 });

@@ -1,9 +1,9 @@
 /* global define */
 
 
-define(['jquery', 'sankey', 'd3', 'print'], function ($, sankey, d3, print) {
+define(['jquery', 'sankey', 'd3'], function ($, sankey, d3) {
 
-    print("d3 = " + d3 + " $ = " + $);
+    console.log("d3 = " + d3 + " $ = " + $);
 
     var margin = {top: 1, right: 1, bottom: 6, left: 1},
         width = 960 - margin.left - margin.right,
