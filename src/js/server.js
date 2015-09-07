@@ -40,7 +40,7 @@
     app.get('/', function (req, res) {
         var version = req.query.v;
         if (!version) version = '';
-        sendFile(res, '/resources/templates/', 'viz' + version + '.html');
+        sendFile(res, '/resources/public', 'index.html');
     });
 
     app.get('/js/vendor/:file', function (req, res) {

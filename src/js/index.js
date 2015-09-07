@@ -8,7 +8,7 @@
 // except for 'index' page ones, which are in a sibling
 // directory.
 require.config({
-    baseUrl: 'components',
+    baseUrl: 'static/components',
     paths: {
         index: '../index',
         vendor: '../vendor',
