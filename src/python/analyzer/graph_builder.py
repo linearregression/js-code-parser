@@ -3,82 +3,9 @@ __author__ = 'sumeet'
 import logging
 import json
 import os
-import fnmatch
-import subprocess
 import db_saver
 import sys
-
-
-def find(pattern, path, skip_dirs):
-    # logging.debug("pattern: {pattern} path: {path} skip_dirs: {skip_dirs}"
-    #              .format(pattern=pattern, path=path, skip_dirs=skip_dirs))
-
-    result = []
-    for root, dirs, files in os.walk(path):
-        # prune directories that need to be skipped
-        dirs[:] = [d for d in dirs if os.path.join(root, d) not in skip_dirs]
-
-        for name in files:
-            full_path = os.path.join(root, name)
-            if fnmatch.fnmatch(name, pattern):
-                result.append(full_path)
-            elif full_path.endswith(pattern):
-                result.append(full_path)
-
-    return result
-
-
-class DependencyExtractor:
-    def __init__(self, app_name, js_loc, ignored_locs, parser):
-        self.ignored_locs = ignored_locs
-        self.js_loc = js_loc
-        self.app_name = app_name
-        self.parser = parser
-
-    def extract(self):
-        js_files = find("*.js", self.js_loc, self.ignored_locs)
-        file_info = {}
-        for js_file in js_files:
-            info = self._parse_file_using_node(js_file)
-            file_info[js_file] = info
-            msg = "parsed file: {file} includes: {num}".format(file=js_file, num=len(info))
-            if len(info) == 0:
-                logging.warn(msg)
-            else:
-                pass
-                # logging.debug(msg)
-
-        # logging.debug("info: {file_info}".format(file_info=file_info))
-
-        return file_info
-
-    def _parse_file_using_node(self, filename):
-        jsp = subprocess.Popen(["node", self.parser, filename], stdout=subprocess.PIPE)
-        return_code = jsp.wait()
-        if return_code != 0:
-            logging.error("UNABLE to parse {filename}".format(filename=filename))
-            return dict()
-
-        p = ''.join([line.rstrip() for line in jsp.stdout.readlines()])
-
-        # logging.debug("filename: {filename} parsed json: {p}".format(filename=filename, p=p))
-
-        return json.loads(p)
-
-    def conf_entries(self, app_modules, shared_loc):
-        shared_files = []
-        for module in app_modules:
-            files = find("{module}.js".format(module=module), shared_loc, self.ignored_locs)
-            if len(files) == 1:
-                shared_files.append({
-                    'app': self.app_name,
-                    'conffile': 'null',
-                    'shortcut': module,
-                    'filename': files[0]
-                })
-
-        return shared_files
-
+import dependency_extractor
 
 class UsingHeuristic:
     graph = {}
@@ -221,7 +148,7 @@ def main():
 
     for app in apps:
         # extract defines and configs from js files
-        extractor = DependencyExtractor(app['name'], app['js'], app['skip'], parser)
+        extractor = dependency_extractor.DependencyExtractor(app['name'], app['js'], app['skip'], parser)
         info = extractor.extract()
         db.save_dependencies(app['name'], info)
 
