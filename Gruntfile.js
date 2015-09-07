@@ -85,10 +85,21 @@ module.exports = function(grunt) {
             }
         },
 
+        watch: {
+            scripts: {
+                files: ['src/**/*.js'],
+                tasks: ['default'],
+                options: {
+                    spawn: false,
+                },
+            },
+        },
+
         clean: ['build']
 
     });
 
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-copy');
