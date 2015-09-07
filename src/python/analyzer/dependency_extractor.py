@@ -1,7 +1,7 @@
 
 import logging
 import subprocess
-from find import find
+from file_find import find
 import json
 
 class DependencyExtractor:
