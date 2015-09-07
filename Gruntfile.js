@@ -18,7 +18,7 @@ module.exports = function(grunt) {
 
         copy: {
             website: {
-                src: 'src/js/app.js',
+                src: 'src/js/server.js',
                 dest: 'build/website/',
                 flatten: true,
                 expand: true
@@ -40,6 +40,32 @@ module.exports = function(grunt) {
                 expand: true,
                 src: 'resources/**/*',
                 dest: 'build/website/'
+            },
+            require_js: {
+                src: 'node_modules/requirejs/require.js',
+                dest: 'build/website/resources/public/vendor/',
+                flatten: true,
+                expand: true
+            },
+            index_js: {
+                src: 'src/js/index.js',
+                dest: 'build/website/resources/public/',
+                flatten: true,
+                expand: true
+            },
+            index_tree: {
+                cwd: 'src/js/index',
+                src: '*.js',
+                dest: 'build/website/resources/public/index',
+                flatten: true,
+                expand: true
+            },
+            components_tree: {
+                cwd: 'src/js/components',
+                src: '*.js',
+                dest: 'build/website/resources/public/components',
+                flatten: true,
+                expand: true
             }
         },
 
