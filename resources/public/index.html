@@ -26,14 +26,16 @@
 </script>
 
 <script type="text/template" id="code-category-file-list-tmpl">
-    <div class="code_category_list" id="<%= + appName + %>">
+    <% for (var app in hello) { %>
+    <div class="code_category_list" id="<%= app %>">
         <ol class="module_list">
-            <lh class="module_list_title"><%= appName %></lh>
-            <% _.each(fileList, function(file) { %>
+            <lh class="module_list_title"><%= app %></lh>
+            <% console.dir(hello[app]); _.each(hello[app], function(file) { %>
             <li><%= file %></li>
             <%}); %>
         </ol>
     </div>
+    <% } %>
 </script>
 
 </body>
