@@ -17,12 +17,22 @@
     <div class='code_category_headings'>
         <label class='module_selector_label'>app name:
             <select>
-                <% console.log("this " + this);
-                   for (var app in this) { %>
-                    <option value="<%= app %>"><%= app %></option>
+                <% for (var app in hello) { %>
+                <option value="<%= app %>"><%= app %></option>
                 <% } %>
             </select>
         </label>
+    </div>
+</script>
+
+<script type="text/template" id="code-category-file-list-tmpl">
+    <div class="code_category_list" id="<%= + appName + %>">
+        <ol class="module_list">
+            <lh class="module_list_title"><%= appName %></lh>
+            <% _.each(fileList, function(file) { %>
+            <li><%= file %></li>
+            <%}); %>
+        </ol>
     </div>
 </script>
 
