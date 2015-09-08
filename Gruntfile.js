@@ -72,6 +72,16 @@ module.exports = function(grunt) {
                 dest: 'build/website/resources/public/vendor',
                 expand: true,
                 flatten: true
+            },
+            shared_components: {
+                src: [
+                    'node_modules/filelistview/FileListView.js',
+                    'node_modules/codemodel/CodeModel.js',
+                    'node_modules/codecategoryselectview/CodeCategorySelectView.js'
+                ],
+                dest: 'build/website/resources/public/components',
+                expand: true,
+                flatten: true
             }
         },
 

@@ -15,7 +15,10 @@
     "node-dir": "^0.1.8",
     "requirejs": "^2.1.20",
     "requirejs-text": "^2.0.12",
-    "sqlite3": "^3.0.10"
+    "sqlite3": "^3.0.10",
+    "codemodel": "^0.0.1",
+    "codecategoryselectview": "^0.0.1",
+    "filelistview": "^0.0.1"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
