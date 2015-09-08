@@ -28,8 +28,8 @@
     "nodemon": "^1.4.0"
   },
   "scripts": {
-    "start": "node_modules/.bin/nodemon app.js",
-    "test": "rm -rf db.sqlite; python build_graph.py"
+    "start": "node_modules/.bin/nodemon build/website/server.js",
+    "test": "grunt clean analyzer"
   },
   "keywords": [
     "code",
