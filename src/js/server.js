@@ -15,7 +15,9 @@
 
     var db;
 
-    app.use('/static', express.static('resources/public'));
+    //console.log("dirname: " + __dirname);
+
+    app.use('/static', express.static(__dirname + '/resources/public'));
 
     var sendFile = function (res, dir, file) {
         var options = {

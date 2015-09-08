@@ -17,7 +17,10 @@
     <div class='code_category_headings'>
         <label class='module_selector_label'>app name:
             <select>
-                <option value="hehe">hehe</option>
+                <% console.log("this " + this);
+                   for (var app in this) { %>
+                    <option value="<%= app %>"><%= app %></option>
+                <% } %>
             </select>
         </label>
     </div>

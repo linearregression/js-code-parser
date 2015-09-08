@@ -26,13 +26,14 @@ define(['jquery', 'underscore', 'backbone', 'viz'], function ($, _, Backbone, vi
     app.CodeCategoryView = Backbone.View.extend({
         el: '#code-category-headings',
         template: _.template($("#code-category-list-tmpl").html()),
-        model: app.codeModel,
         render: function() {
+            //{abc: 'abc', def: 'def'}
+            this.model.fetch();
             this.$el.html(this.template(this.model.toJSON()));
         }
     });
 
-    app.codeCategoryView = new app.CodeCategoryView();
+    app.codeCategoryView = new app.CodeCategoryView({model: app.codeModel});
 
     app.Router = Backbone.Router.extend({
         routes: {
