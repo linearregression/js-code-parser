@@ -32,6 +32,19 @@ define(['jquery', 'underscore', 'backbone', 'viz'], function ($, _, Backbone, vi
             //{abc: 'abc', def: 'def'}
             //console.dir(this.model.toJSON());
             this.$el.html(this.template({ hello: this.model.toJSON() }));
+            $(".code_category_headings select").change(function() {
+                console.log($(this).val());
+                var listName = "#" + $(this).val() + " ol";
+                console.log("hey somebody clicked me!!" + listName);
+                //console.log($(listName));
+                console.log("show: " + $(listName) + "hide: " + app.prevCodeBlock);
+                if (app.prevCodeBlock) {
+                    $(app.prevCodeBlock).css('display', 'none');
+                }
+
+                $(listName).css('display', 'block');
+                app.prevCodeBlock = listName;
+            });
             return this;
         }
     });
@@ -45,6 +58,10 @@ define(['jquery', 'underscore', 'backbone', 'viz'], function ($, _, Backbone, vi
         render: function() {
             console.log("rendering fileListView");
             this.$el.html(this.template({ hello: this.model.toJSON() }));
+            // make core block always visible
+            $("#core ol").css('display', 'block');
+            app.prevCodeBlock = "#ess ol";
+            $(app.prevCodeBlock).css('display', 'block');
         }
     });
 

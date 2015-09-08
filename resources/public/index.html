@@ -18,6 +18,7 @@
         <label class='module_selector_label'>app name:
             <select>
                 <% for (var app in hello) { %>
+                <% if (app === 'core' || app === 'common') continue; %>
                 <option value="<%= app %>"><%= app %></option>
                 <% } %>
             </select>
@@ -30,7 +31,7 @@
     <div class="code_category_list" id="<%= app %>">
         <ol class="module_list">
             <lh class="module_list_title"><%= app %></lh>
-            <% console.dir(hello[app]); _.each(hello[app], function(file) { %>
+            <% _.each(hello[app], function(file) { %>
             <li><%= file %></li>
             <%}); %>
         </ol>
